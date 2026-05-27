@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body{
+  font-family: 'Segoe UI', sans-serif;
+  background:#111;
+  color:white;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  min-height:100vh;
+}
+.container{
+  width:380px;
+}
+textarea, input{
+  width:100%;
+  margin-top:8px;
+  padding:10px;
+  border-radius:10px;
+  border:1px solid #333;
+  background:#000;
+  color:#fff;
+}
+button{
+  width:100%;
+  padding:12px;
+  margin-top:8px;
+  border:none;
+  border-radius:12px;
+  background:#ff4d88;
+  color:white;
+  cursor:pointer;
+}
+button:hover{
+  background:#e6005c;
+}
+.result{
+  margin-top:12px;
+  background:#000;
+  padding:12px;
+  border-radius:12px;
+  white-space:pre-line;
+  border:1px solid #333;
+}
+#numeroTexto{
+  margin-top:10px;
+  font-size:18px;
+  color:#00ffcc;
+  text-align:center;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+<h2>🌸 LUNALI STORE 🌸</h2>
+
+<textarea id="input" placeholder="Pega aquí el texto..."></textarea>
+
+<input id="correoNuevo" placeholder="Correo">
+<input id="password" placeholder="Contraseña">
+
+<button onclick="procesar()">Generar</button>
+<button onclick="copiar()">Copiar texto</button>
+<button onclick="enviarWhats()">Enviar a WhatsApp</button>
+<button onclick="copiarNumero()">Copiar número</button>
+
+<div id="numeroTexto"></div>
+
+<div class="result" id="output"></div>
+</div>
+
+<script>
+
+function limpiarNumero(num){
+  if(!num) return "";
+  num = num.replace(/\D/g,"");
+  if(num.startsWith("52") && num.length > 10){
+    num = num.slice(2);
+  }
+  return num;
+}
+
+function procesar(){
+  let text = document.getElementById("input").value;
+
+  if(!text){
+    alert("Pega texto primero");
+    return;
+  }
+
+  let limpio = text.replace(/(\d)([a-zA-Z])/g, "$1 $2");
+
+  // 📞 número
+  let numeros = limpio.match(/\d{10,13}/g);
+  let numeroFinal = numeros ? limpiarNumero(numeros[0]) : "";
+
+  document.getElementById("numeroTexto").innerText =
+    numeroFinal ? "📞 Número: " + numeroFinal : "❌ No detectado";
+
+  // 📧 correo (MEJORADO)
+  let correos = text.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g);
+  let correoCaida = "";
+  if(correos){
+    correoCaida = correos.sort((a,b)=>{
+      return b.split("@")[0].length - a.split("@")[0].length;
+    })[0];
+  }
+
+  // 📅 fechas
+  let fechas = limpio.match(/\d{1,2}\/\d{1,2}\/\d{4}/g);
+  let fechaCompra = fechas ? fechas[1] : "";
+
+  let correoNuevo = document.getElementById("correoNuevo").value;
+  let password = document.getElementById("password").value;
+
+  let t = limpio.toLowerCase();
+
+  // 💳 plan
+  let plan = "";
+  if(/anual/i.test(limpio)){
+    plan = " - Anual";
+  }
+
+  // 🎬 plataforma
+  let plataforma = "No detectado";
+
+  if(/netflix/i.test(limpio)) plataforma = "Netflix";
+  else if(/prime|primevideo|amazon/i.test(limpio)) plataforma = "Prime Video";
+  else if(/disney/i.test(limpio)) plataforma = "Disney+";
+  else if(/vix/i.test(limpio)) plataforma = "Vix";
+  else if(/paramount/i.test(limpio)) plataforma = "Paramount+";
+  else if(/crunchy/i.test(limpio)) plataforma = "Crunchyroll";
+  else if(/spotify/i.test(limpio)) plataforma = "Spotify";
+
+  let tipo = t.includes("perfil") ? "Perfil" : "Completa";
+
+  let hoy = new Date().toLocaleDateString("es-MX");
+
+let resultado =
+`✿✧ *LUNALI STORE* ✧✿
+✿ Garantia entregada: ${hoy}
+✧ ${plataforma}${plan} (${tipo})
+
+> CAIDA: ${correoCaida}
+✧ F.COMPRA: ${fechaCompra}
+
+✿✧ *REEMPLAZO* ✧✿
+✉ Correo: ${correoNuevo}
+✧ Contraseña: ${password}
+
+✿ Usar perfil asignado
+✧ Dudas con admin en turno`;
+
+  document.getElementById("output").innerText = resultado;
+}
+
+function copiar(){
+  navigator.clipboard.writeText(document.getElementById("output").innerText);
+}
+
+function copiarNumero(){
+  let texto = document.getElementById("numeroTexto").innerText;
+  let numero = texto.replace(/\D/g,"");
+  navigator.clipboard.writeText(numero);
+}
+
+// 🔥 FIX EMOJIS WHATSAPP
+function enviarWhats(){
+  let mensaje = document.getElementById("output").innerText;
+  let numero = document.getElementById("numeroTexto").innerText.replace(/\D/g,"");
+
+  if(!numero){
+    alert("No hay número");
+    return;
+  }
+
+  let url = `https://wa.me/52${numero}?text=${encodeURIComponent(mensaje)}`;
+  window.open(url, "_blank");
+}
+
+</script>
+
+</body>
+</html>
